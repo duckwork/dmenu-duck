@@ -120,7 +120,7 @@ main(int argc, char *argv[]) {
 	for(i = 1; i < argc; i++)
 		/* these options take no arguments */
 		if(!strcmp(argv[i], "-v")) {      /* prints version information */
-			puts("dmenu2-"VERSION);
+			puts("dmenu-duck-"VERSION);
 			exit(EXIT_SUCCESS);
 		}
 		else if(!strcmp(argv[i], "-hist"))
