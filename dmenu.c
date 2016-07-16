@@ -86,6 +86,7 @@ static ColorSet *dimcol;
 static ColorSet *undercol;
 static Atom clip, utf8;
 static Bool topbar = True;
+static Bool instant = False;
 static Bool centerX = False;
 static Bool running = True;
 static Bool filter = False;
@@ -122,81 +123,82 @@ main(int argc, char *argv[]) {
 		if(!strcmp(argv[i], "-v")) {      /* prints version information */
 			puts("dmenu-duck-"VERSION);
 			exit(EXIT_SUCCESS);
-		}
-		else if(!strcmp(argv[i], "-hist"))
+		} else if(!strcmp(argv[i], "-hist")) {
 			histfile = argv[++i];
-		else if(!strcmp(argv[i], "-b"))   /* appears at the bottom of the screen */
+		} else if(!strcmp(argv[i], "-b")) {   /* appears at the bottom of the screen */
 			topbar = False;
- 		else if(!strcmp(argv[i], "-q"))
- 			quiet = True;
-		else if(!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
+		} else if(!strcmp(argv[i], "-q")) {
+			quiet = True;
+		} else if(!strcmp(argv[i], "-f")) {   /* grabs keyboard before reading stdin */
 			fast = True;
-		else if(!strcmp(argv[i], "-z"))   /* enable fuzzy matching */
+		} else if(!strcmp(argv[i], "-z")) {   /* enable fuzzy matching */
 			match = matchfuzzy;
- 		else if(!strcmp(argv[i], "-r"))
- 			filter = True;
-		else if(!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
+		} else if(!strcmp(argv[i], "-r")) {
+			filter = True;
+		} else if(!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
 			fstrncmp = strncasecmp;
 			fstrstr = cistrstr;
 			fstrchr = strchri;
-		}
-      else if(!strcmp(argv[i], "-mask")) /* password-style input */
-         maskin = True;
-      else if(!strcmp(argv[i], "-noinput"))
-         noinput = True;
-      else if(!strcmp(argv[i], "-centerx"))
-         centerX = True;
+		} else if(!strcmp(argv[i], "-n")) { /* instant match */
+			instant = !instant;
+		} else if(!strcmp(argv[i], "-mask")) { /* password-style input */
+			maskin = True;
+		} else if(!strcmp(argv[i], "-noinput")) {
+			noinput = True;
+		} else if(!strcmp(argv[i], "-centerx")) {
+			centerX = True;
 
-		else if(!strcmp(argv[i], "-t"))
+		} else if(!strcmp(argv[i], "-t")) {
 			match = matchtok;
-		else if(i+1 == argc)
+		} else if(i+1 == argc) {
 			usage();
 		/* these options take one argument */
- 		else if(!strcmp(argv[i], "-x"))
- 			xoffset = atoi(argv[++i]);
- 		else if(!strcmp(argv[i], "-y"))
- 			yoffset = atoi(argv[++i]);
- 		else if(!strcmp(argv[i], "-w"))
- 			width = atoi(argv[++i]);
-		else if(!strcmp(argv[i], "-l"))   /* number of lines in vertical list */
+		} else if(!strcmp(argv[i], "-x")) {
+			xoffset = atoi(argv[++i]);
+		} else if(!strcmp(argv[i], "-y")) {
+			yoffset = atoi(argv[++i]);
+		} else if(!strcmp(argv[i], "-w")) {
+			width = atoi(argv[++i]);
+		} else if(!strcmp(argv[i], "-l")) {   /* number of lines in vertical list */
 			lines = atoi(argv[++i]);
-		else if(!strcmp(argv[i], "-h"))   /* minimum height of single line */
+		} else if(!strcmp(argv[i], "-h")) {   /* minimum height of single line */
 			line_height = atoi(argv[++i]);
-		else if(!strcmp(argv[i], "-uh"))   /* height of underline */
+		} else if(!strcmp(argv[i], "-uh")) {   /* height of underline */
 			under_height = atoi(argv[++i]);
 		#ifdef XINERAMA
-		else if(!strcmp(argv[i], "-s"))   /* screen number for dmenu to appear in */
+		} else if(!strcmp(argv[i], "-s")) {   /* screen number for dmenu to appear in */
 			snum = atoi(argv[++i]);
 		#endif
-		else if (!strcmp(argv[i], "-name")) /* dmenu window name */
+		} else if (!strcmp(argv[i], "-name")) { /* dmenu window name */
 			name = argv[++i];
-		else if (!strcmp(argv[i], "-class")) /* dmenu window class */
+		} else if (!strcmp(argv[i], "-class")) { /* dmenu window class */
 			class = argv[++i];
-		else if (!strcmp(argv[i], "-o"))  /* opacity */
+		} else if (!strcmp(argv[i], "-o")) {  /* opacity */
 			opacity = atof(argv[++i]);
-		else if (!strcmp(argv[i], "-dim"))  /* dim opacity */
+		} else if (!strcmp(argv[i], "-dim")) {  /* dim opacity */
 			dimopacity = atof(argv[++i]);
-		else if (!strcmp(argv[i], "-dc")) /* dim color */
+		} else if (!strcmp(argv[i], "-dc")) { /* dim color */
 			dimcolor = argv[++i];
-		else if (!strcmp(argv[i], "-uc")) /* underline color */
+		} else if (!strcmp(argv[i], "-uc")) { /* underline color */
 			undercolor = argv[++i];
-		else if(!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
+		} else if(!strcmp(argv[i], "-p")) {   /* adds prompt to left of input field */
 			prompt = argv[++i];
-		else if(!strcmp(argv[i], "-fn"))  /* font or font set */
+		} else if(!strcmp(argv[i], "-fn")) {  /* font or font set */
 			font = argv[++i];
-		else if(!strcmp(argv[i], "-nb"))  /* normal background color */
+		} else if(!strcmp(argv[i], "-nb")) {  /* normal background color */
 			normbgcolor = argv[++i];
-		else if(!strcmp(argv[i], "-nf"))  /* normal foreground color */
+		} else if(!strcmp(argv[i], "-nf")) {  /* normal foreground color */
 			normfgcolor = argv[++i];
-		else if(!strcmp(argv[i], "-sb"))  /* selected background color */
+		} else if(!strcmp(argv[i], "-sb")) {  /* selected background color */
 			selbgcolor = argv[++i];
-		else if(!strcmp(argv[i], "-sf"))  /* selected foreground color */
+		} else if(!strcmp(argv[i], "-sf")) {  /* selected foreground color */
 			selfgcolor = argv[++i];
-		else
+		} else {
 			usage();
+		}
 
 	dc = initdc();
- 	read_resourses();
+	read_resourses();
 	initfont(dc, font ? font : DEFFONT);
 	normcol = initcolor(dc, normfgcolor, normbgcolor);
 	selcol = initcolor(dc, selfgcolor, selbgcolor);
@@ -824,6 +826,11 @@ matchstr(void) {
 		matchend = substrend;
 	}
 	curr = sel = matches;
+	if (instant && matches && matches == matchend && !lsubstr) {
+		puts(matches->text);
+		cleanup();
+		exit(EXIT_SUCCESS);
+	}
 	calcoffsets();
 }
 
@@ -851,6 +858,12 @@ matchtok(void) {
 	}
 	free(tokv);
 	curr = prev = next = sel = matches;
+	/* Test (cf. matchstr) */
+	if (instant && matches && matches == matchend) {
+		puts(matches->text);
+		cleanup();
+		exit(EXIT_SUCCESS);
+	}
 	calcoffsets();
 }
 
@@ -871,6 +884,12 @@ matchfuzzy(void) {
 	}
 
 	curr = sel = matches;
+	/* Test (cf. matchstr) */
+	if (instant && matches && matches == matchend) {
+		puts(matches->text);
+		cleanup();
+		exit(EXIT_SUCCESS);
+	}
 	calcoffsets();
 }
 
@@ -1150,7 +1169,7 @@ setup(void) {
 
 void
 usage(void) {
-	fputs("usage: dmenu [-b] [-q] [-f] [-r] [-i] [-z] [-t] [-mask] [-noinput]\n"
+	fputs("usage: dmenu [-b] [-q] [-f] [-r] [-i] [-n] [-z] [-t] [-mask] [-noinput]\n"
 				"             [-s screen] [-name name] [-class class] [ -o opacity]\n"
 				"             [-dim opcity] [-dc color] [-l lines] [-p prompt] [-fn font]\n"
 	      "             [-x xoffset] [-y yoffset] [-h height] [-w width] [-uh height] [-centerx]\n"
