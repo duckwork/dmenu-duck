@@ -366,8 +366,8 @@ createmaskinput(char *maskinput, int length)
 void
 drawmenu(void) {
 	int curpos;
-   char maskinput[sizeof text];
-   int length = maskin ? utf8length() : cursor;
+	char maskinput[sizeof text];
+	int length = maskin ? utf8length() : cursor;
 	Item *item;
 
 	dc->x = 0;
@@ -703,22 +703,92 @@ buttonpress(XEvent *e)
 	}
 	/* scroll up */
 	if (ev->button == Button4 && prev) {
-		sel = curr = prev;
+		curr = prev;
 		calcoffsets();
+		if (lines > 0) {
+			dc->w = mw - dc->x;
+			for (item = curr; item != next; item = item->right) {
+				dc->y += dc->h;
+				if (ev->y >= dc->y && ev->y <= (dc->y + dc->h)) {
+					sel = item;
+					drawmenu();
+					return;
+				}
+			}
+		} else {
+			dc->x += inputw;
+			dc->w = textw(dc, "<");
+			for (item = curr; item != next; item = item->right) {
+				dc->x += dc->w;
+				dc->w = MIN(textw(dc, item->text), mw - dc->x - textw(dc, ">"));
+				if (ev->x >= dc->x && ev->x <= (dc->x + dc->w)) {
+					sel = item;
+					drawmenu();
+					return;
+				}
+			}
+		}
 		drawmenu();
 		return;
 	}
 	/* scroll down */
 	if (ev->button == Button5 && next) {
-		sel = curr = next;
+		curr = next;
 		calcoffsets();
-		drawmenu();
-		return;
+		if (lines > 0) {
+			dc->w = mw - dc->x;
+			for (item = curr; item != next; item = item->right) {
+				dc->y += dc->h;
+				if (ev->y >= dc->y && ev->y <= (dc->y + dc->h)) {
+					sel = item;
+					drawmenu();
+					return;
+				}
+			}
+		} else {
+			dc->x += inputw;
+			dc->w = textw(dc, "<");
+			for (item = curr; item != next; item = item->right) {
+				dc->x += dc->w;
+				dc->w = MIN(textw(dc, item->text), mw - dc->x - textw(dc, ">"));
+				if (ev->x >= dc->x && ev->x <= (dc->x + dc->w)) {
+					sel = item;
+					drawmenu();
+					return;
+				}
+			}
+		}
+	}
+	if (ev->button == 0) {
+		/* motion */
+		if (lines > 0) {
+			dc->w = mw - dc->x;
+			for (item = curr; item != next; item = item->right) {
+				dc->y += dc->h;
+				if (ev->y >= dc->y && ev->y <= (dc->y + dc->h)) {
+					sel = item;
+					drawmenu();
+					return;
+				}
+			}
+		} else {
+			dc->x += inputw;
+			dc->w = textw(dc, "<");
+			for (item = curr; item != next; item = item->right) {
+				dc->x += dc->w;
+				dc->w = MIN(textw(dc, item->text), mw - dc->x - textw(dc, ">"));
+				if (ev->x >= dc->x && ev->x <= (dc->x + dc->w)) {
+					sel = item;
+					drawmenu();
+					return;
+				}
+			}
+		}
 	}
 	if (ev->button != Button1)
 		return;
 	if (lines > 0) {
-		/* vertical list: (ctrl)left-click */
+		/* vertical list: left-click */
 		dc->w = mw - dc->x;
 		for (item = curr; item != next; item = item->right) {
 			dc->y += dc->h;
@@ -1000,6 +1070,7 @@ run(void) {
 		if(XFilterEvent(&ev, win))
 			continue;
 		switch(ev.type) {
+		case MotionNotify:
 		case ButtonPress:
 			buttonpress(&ev);
 			break;
@@ -1143,7 +1214,7 @@ setup(void) {
 	/* create menu window */
 	swa.background_pixel = normcol->BG;
 	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask |
-					 ButtonPressMask;
+					 ButtonPressMask | PointerMotionMask;
 	win = XCreateWindow(dc->dpy, root, x, y, mw, mh, 0,
 	                    DefaultDepth(dc->dpy, screen), CopyFromParent,
 	                    DefaultVisual(dc->dpy, screen),
