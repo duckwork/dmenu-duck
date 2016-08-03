@@ -679,6 +679,11 @@ buttonpress(XEvent *e)
 		dc->w = promptw;
 		dc->x = dc->w;
 	}
+	/* right-click on prompt: exit */
+	if (ev->button == Button1 &&
+	   ((lines <= 0 && ev->x >= 0 && ev->x <= dc->x))) {
+		exit(1);
+		}
 	/* input field */
 	dc->w = (lines > 0 || !matches) ? mw - dc->x : inputw;
 	if ((curpos = textnw(dc, text, cursor) + dc->h/2 - 2) < dc->w){;}
