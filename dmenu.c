@@ -277,6 +277,11 @@ read_resourses(void) {
 			dimcolor = strdup(xvalue.addr);
 		if( undercolor == NULL && XrmGetResource(xdb, "dmenu.undercolor", "*", datatype, &xvalue) == True )
 			undercolor = strdup(xvalue.addr);
+        if( line_height == 0 && XrmGetResource(xdb, "dmenu.lineHeight", "*", datatype, &xvalue) == True ) {
+            static const char *lh;
+            lh = strdup (xvalue.addr);
+			line_height = atoi(lh);
+        }
 
 		if( XrmGetResource(xdb, "dmenu.opacity", "*", datatype, &xvalue) == True )
 			opacity = atof(strdup(xvalue.addr));
